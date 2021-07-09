@@ -1,0 +1,730 @@
+VERSION 5.8 ;
+
+BUSBITCHARS "[]" ;
+
+DIVIDERCHAR "/" ;
+
+UNITS
+    DATABASE MICRONS 2000 ;
+END UNITS
+
+MANUFACTURINGGRID 0.000500 ; 
+
+CLEARANCEMEASURE EUCLIDEAN ; 
+
+USEMINSPACING OBS ON ; 
+
+SITE CoreSite
+    CLASS CORE ;
+    SIZE 2.400000 BY 2.400000 ;
+END CoreSite
+
+LAYER m1
+   TYPE ROUTING ;
+   DIRECTION HORIZONTAL ;
+   MINWIDTH 1.200000 ;
+   AREA 0.810000 ;
+   WIDTH 1.200000 ;
+   SPACING 1.200000 ;
+   PITCH 2.400000 2.400000 ;
+END m1
+
+LAYER v1
+    TYPE CUT ;
+    SPACING 0.900000 ;
+    WIDTH 0.600000 ;
+END v1
+
+LAYER m2
+   TYPE ROUTING ;
+   DIRECTION VERTICAL ;
+   MINWIDTH 1.200000 ;
+   AREA 0.810000 ;
+   WIDTH 1.200000 ;
+   SPACING 1.200000 ;
+   PITCH 2.400000 2.400000 ;
+END m2
+
+LAYER v2
+    TYPE CUT ;
+    SPACING 0.900000 ;
+    WIDTH 0.600000 ;
+END v2
+
+LAYER m3
+   TYPE ROUTING ;
+   DIRECTION HORIZONTAL ;
+   MINWIDTH 1.800000 ;
+   AREA 2.250000 ;
+   WIDTH 1.800000 ;
+   SPACING 1.200000 ;
+   PITCH 3.000000 3.000000 ;
+END m3
+
+
+VIA v1_C DEFAULT
+   LAYER m1 ;
+     RECT -0.600000 -0.600000 0.600000 0.600000 ;
+   LAYER v1 ;
+     RECT -0.300000 -0.300000 0.300000 0.300000 ;
+   LAYER m2 ;
+     RECT -0.600000 -0.600000 0.600000 0.600000 ;
+END v1_C
+
+VIA v2_C DEFAULT
+   LAYER m2 ;
+     RECT -0.600000 -0.600000 0.600000 0.600000 ;
+   LAYER v2 ;
+     RECT -0.300000 -0.300000 0.300000 0.300000 ;
+   LAYER m3 ;
+     RECT -0.600000 -0.600000 0.600000 0.600000 ;
+END v2_C
+
+MACRO _0_0cell_0_0g3x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g3x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 26.400000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 20.400000 8.400000 21.600000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 20.400000 13.200000 21.600000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 12.900000 14.100000 ;
+    END
+END _0_0cell_0_0g3x0
+
+MACRO _0_0cell_0_0g3x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g3x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 36.000000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 20.400000 8.400000 21.600000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 20.400000 13.200000 21.600000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 12.900000 14.100000 ;
+    END
+END _0_0cell_0_0g3x0_plug
+
+MACRO _0_0cell_0_0g5x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g5x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 9.600000 BY 26.400000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 4.800000 20.400000 6.000000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 3.300000 14.100000 ;
+    END
+END _0_0cell_0_0g5x0
+
+MACRO _0_0cell_0_0g5x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g5x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 9.600000 BY 36.000000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 4.800000 20.400000 6.000000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 3.300000 14.100000 ;
+    END
+END _0_0cell_0_0g5x0_plug
+
+MACRO _0_0cell_0_0g0x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g0x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 26.400000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 20.400000 8.400000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 11.400000 14.100000 ;
+    END
+END _0_0cell_0_0g0x0
+
+MACRO _0_0cell_0_0g0x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g0x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 36.000000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 20.400000 8.400000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 11.400000 14.100000 ;
+    END
+END _0_0cell_0_0g0x0_plug
+
+MACRO _0_0cell_0_0g7x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g7x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 9.600000 BY 26.400000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 4.800000 20.400000 6.000000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 3.300000 14.100000 ;
+    END
+END _0_0cell_0_0g7x0
+
+MACRO _0_0cell_0_0g7x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g7x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 9.600000 BY 36.000000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 20.400000 3.600000 21.600000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 4.800000 20.400000 6.000000 21.600000 ;
+        END
+    END in_51_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 3.300000 14.100000 ;
+    END
+END _0_0cell_0_0g7x0_plug
+
+MACRO _0_0cell_0_0g6x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g6x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 33.600000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 27.600000 3.600000 28.800000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 27.600000 8.400000 28.800000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 27.600000 13.200000 28.800000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 12.900000 21.300000 ;
+    END
+END _0_0cell_0_0g6x0
+
+MACRO _0_0cell_0_0g6x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g6x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 19.200000 BY 43.200000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 27.600000 3.600000 28.800000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 27.600000 8.400000 28.800000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 27.600000 13.200000 28.800000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 12.900000 21.300000 ;
+    END
+END _0_0cell_0_0g6x0_plug
+
+MACRO _0_0cell_0_0g4x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g4x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 31.200000 BY 31.200000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 25.200000 3.600000 26.400000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 25.200000 8.400000 26.400000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 25.200000 13.200000 26.400000 ;
+        END
+    END in_52_6
+    PIN in_53_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 16.800000 25.200000 18.000000 26.400000 ;
+        END
+    END in_53_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 23.700000 18.900000 ;
+    END
+END _0_0cell_0_0g4x0
+
+MACRO _0_0cell_0_0g4x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g4x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 31.200000 BY 40.800000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 25.200000 3.600000 26.400000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 7.200000 25.200000 8.400000 26.400000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 12.000000 25.200000 13.200000 26.400000 ;
+        END
+    END in_52_6
+    PIN in_53_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 16.800000 25.200000 18.000000 26.400000 ;
+        END
+    END in_53_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 23.700000 18.900000 ;
+    END
+END _0_0cell_0_0g4x0_plug
+
+MACRO _0_0cell_0_0g2x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g2x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 33.600000 BY 31.200000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 25.200000 3.600000 26.400000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 9.600000 25.200000 10.800000 26.400000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 16.800000 25.200000 18.000000 26.400000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 26.100000 18.900000 ;
+    END
+END _0_0cell_0_0g2x0
+
+MACRO _0_0cell_0_0g2x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g2x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 33.600000 BY 40.800000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 25.200000 3.600000 26.400000 ;
+        END
+    END in_50_6
+    PIN in_51_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 9.600000 25.200000 10.800000 26.400000 ;
+        END
+    END in_51_6
+    PIN in_52_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 16.800000 25.200000 18.000000 26.400000 ;
+        END
+    END in_52_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+    OBS
+      LAYER m1 ;
+         RECT 2.400000 7.200000 26.100000 18.900000 ;
+    END
+END _0_0cell_0_0g2x0_plug
+
+MACRO _0_0cell_0_0g1x0
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g1x0 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 7.200000 BY 19.200000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 13.200000 3.600000 14.400000 ;
+        END
+    END in_50_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+END _0_0cell_0_0g1x0
+
+MACRO _0_0cell_0_0g1x0_plug
+    CLASS CORE ;
+    FOREIGN _0_0cell_0_0g1x0_plug 0.000000 0.000000 ;
+    ORIGIN 0.000000 0.000000 ;
+    SIZE 7.200000 BY 28.800000 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN in_50_6
+        DIRECTION INPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 13.200000 3.600000 14.400000 ;
+        END
+    END in_50_6
+    PIN out
+        DIRECTION OUTPUT ;
+        USE SIGNAL ;
+        PORT
+        LAYER m2 ;
+        RECT 2.400000 2.400000 3.600000 3.600000 ;
+        END
+    END out
+END _0_0cell_0_0g1x0_plug
+
