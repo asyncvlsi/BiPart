@@ -20,7 +20,7 @@
 #include <array>
 #include <unordered_set>
 
-#include "/net/ohm/export/iss/sepideh/phyDB/include/phydb.h"
+#include "phydb/phydb.h"
 using namespace phydb;
 namespace bipart {
 void Partition(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K);
