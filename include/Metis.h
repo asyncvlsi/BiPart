@@ -5,6 +5,8 @@
 #include <galois/graphs/LC_CSR_Graph.h>
 #include <galois/AtomicWrapper.h>
 
+namespace bipart {
+
 class MetisNode;
 typedef double EdgeTy;
 
@@ -194,4 +196,5 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
 void partition(MetisGraph*, unsigned);
 // Refinement
 void refine(MetisGraph* coarseGraph, unsigned K, double imbalance);
+}
 #endif

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <fstream>
 
-namespace {
+namespace bipart{
 
 void projectPart(MetisGraph* Graph) {
   GGraph* fineGraph   = Graph->getFinerGraph()->getGraph();
@@ -525,7 +525,6 @@ void parallel_make_balance(GGraph& g, float tol, int p) {
   } // end while
 }
 
-} // namespace
 
 bool isPT(int n) {
   if (n == 0)
@@ -556,4 +555,5 @@ void refine(MetisGraph* coarseGraph, unsigned K, double imbalance) {
       projectPart(coarseGraph);
     }
   } while ((coarseGraph = coarseGraph->getFinerGraph()));
+}
 }

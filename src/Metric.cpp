@@ -23,6 +23,7 @@
 #include <iostream>
 #include <numeric>
 
+namespace bipart {
 struct onlineStat {
   unsigned num;
   unsigned val;
@@ -108,4 +109,5 @@ void printCuts(const char* str, MetisGraph* g, unsigned numPartitions) {
   std::cout << str
             << " Minimum Edge Cut: " << *std::min_element(ec.begin(), ec.end())
             << "\n";
+}
 }

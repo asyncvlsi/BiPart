@@ -29,6 +29,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
+namespace bipart {
 constexpr static const unsigned CHUNK_SIZE      = 512U;
 
 int TOTALW;
@@ -36,7 +37,7 @@ int LIMIT;
 bool FLAG = false;
 namespace {
 
-int hash(unsigned val) {
+int bihash(unsigned val) {
   unsigned long int seed = val * 1103515245 + 12345;
   return ((unsigned)(seed / 65536) % 32768);
 }
@@ -49,10 +50,10 @@ void parallelRand(MetisGraph* graph, int) {
   T_RAND.start();
 
 	galois::do_all(
-      galois::iterate((uint64_t) 0, fineGGraph->hedges),
+      galois::iterate((uint64_t) 0, (uint64_t)fineGGraph->hedges),
       [&fineGGraph](uint64_t item) {
 				unsigned netnum = fineGGraph->getData(item, flag_no_lock).netnum;
-				netnum= hash(netnum);
+				netnum= bihash(netnum);
         fineGGraph->getData(item, flag_no_lock).netrand = netnum;
       },
 			galois::steal(),
@@ -65,10 +66,10 @@ void parallelRand(MetisGraph* graph, int) {
 		galois::StatTimer T_INDEX("INDEX");
   	T_INDEX.start();
 		galois::do_all(
-      galois::iterate((uint64_t) 0, fineGGraph->hedges),
+      galois::iterate((uint64_t) 0, (uint64_t)fineGGraph->hedges),
       [&fineGGraph](uint64_t item) {
         unsigned netnum = fineGGraph->getData(item, flag_no_lock).index;
-        netnum= hash(1);
+        netnum=  bihash(1);
         fineGGraph->getData(item, flag_no_lock).index = netnum;
       },
       galois::steal(),
@@ -692,4 +693,5 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
     ++iterNum;
   }
   return coarseGraph;
+}
 }

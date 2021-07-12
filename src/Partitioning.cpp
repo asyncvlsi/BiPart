@@ -31,33 +31,8 @@
 #include <climits>
 #include <array>
 
-namespace {
+namespace bipart {
 // final
-__attribute__((unused)) int cut(GGraph& g) {
-
-  GNodeBag bag;
-  galois::do_all(
-      galois::iterate(g),
-      [&](GNode n) {
-        if (g.hedges <= n)
-          return;
-        for (auto cell : g.edges(n)) {
-          auto c   = g.getEdgeDst(cell);
-          int part = g.getData(c).getPart();
-          for (auto x : g.edges(n)) {
-            auto cc   = g.getEdgeDst(x);
-            int partc = g.getData(cc).getPart();
-            if (partc != part) {
-              bag.push(n);
-              return;
-            }
-          }
-        }
-      },
-      galois::loopname("cutsize"));
-  return std::distance(bag.begin(), bag.end());
-}
-
 void initGain(GGraph& g) {
   galois::do_all(
       galois::iterate(g),
@@ -110,7 +85,6 @@ void initGain(GGraph& g) {
       galois::steal(), galois::loopname("initGainsPart"));
 }
 
-} // namespace
 
 // Final
 void partition(MetisGraph* mcg, unsigned K) {
@@ -261,4 +235,5 @@ void partition(MetisGraph* mcg, unsigned K) {
       // updateGain(*g,zz);
     }
   }
+}
 }
