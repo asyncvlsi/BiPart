@@ -41,7 +41,7 @@ void Partitions(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K) {
 
 
 void biparting(PhyDB& db, int Csize, int Rsize) {
-  galois::SharedMemSys G;
+  //galois::SharedMemSys G;
 
 
   MetisGraph metisGraph;
