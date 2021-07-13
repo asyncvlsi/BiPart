@@ -40,7 +40,7 @@ void Partitions(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K) {
 }
 
 
-void biparting(PhyDB& db, int Csize, int Rsize) {
+MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   //galois::SharedMemSys G;
 
 
@@ -135,26 +135,212 @@ void biparting(PhyDB& db, int Csize, int Rsize) {
       galois::steal(), galois::loopname("build initial graph"));
   galois::preAlloc(galois::runtime::numPagePoolAllocTotal() * 10);
   galois::reportPageAlloc("MeminfoPre");
-  Partitions(&metisGraph, Csize, Rsize);
-
-  
-  galois::GAccumulator<unsigned int> area0;
-  galois::GAccumulator<unsigned int> area1;
-  
   galois::do_all(
-      galois::iterate(graph),
+      galois::iterate(graph.hedges, graph.size()),
+      [&](GNode item) {
+        // accum += g->getData(item).getWeight();
+        graph.getData(item, galois::MethodFlag::UNPROTECTED)
+            .initRefine(0, true);
+        graph.getData(item, galois::MethodFlag::UNPROTECTED).initPartition();
+      },
+      galois::steal(), galois::loopname("initPart"));
+
+  Partitions(&metisGraph, Csize, K);
+
+  const int k = K;
+  // calculating number of iterations/levels required
+  int num = log2(k);
+
+  int kValue[k];
+  for (int i = 0; i < k; i++)
+    kValue[i] = 0;
+
+  kValue[0]           = (k + 1) / 2;
+  kValue[(k + 1) / 2] = k / 2;
+
+  galois::do_all(
+      galois::iterate((uint64_t)graph.hedges, graph.size()),
       [&](GNode n) {
-        if (n > hedges) {
-          int part = graph.getData(n).getPart();
-          if (part == 0) 
-            area0 += graph.getData(n).area;
-          else
-            area1 += graph.getData(n).area;
+        unsigned pp = graph.getData(n).getPart();
+        if (pp == 1) {
+          graph.getData(n).setPart((k + 1) / 2);
         }
       },
-      galois::steal(), galois::loopname("build initial graph"));
+      galois::steal(), galois::loopname("set part (original graph)"));
 
-  int part1x = LLX/2;
-  int part1y = LLY/2;
+  // running it level by level
+
+  // toProcess contains nodes to be executed in a given level
+  std::set<int> toProcess;
+  std::set<int> toProcessNew;
+  toProcess.insert(0);
+  toProcess.insert((k + 1) / 2);
+
+  std::vector<std::vector<GNode>> nodesvec(k);
+  // std::array<std::vector<GNode>, 100> hedgesvec;
+
+  for (int level = 0; level < num; level++) {
+
+    for (int i = 0; i < k; i++)
+      nodesvec[i].clear();
+
+    // distributing nodes in relevant vectors according to their current
+    // partition assignment
+    for (GNode n = graph.hedges; n < graph.size(); n++) {
+      unsigned pp = graph.getData(n).getPart();
+      nodesvec[pp].push_back(n);
+    }
+
+    std::vector<std::vector<GNode>> hedgevec(k);
+
+    // distribute hyperedges according to their current partition
+    galois::do_all(
+        galois::iterate((uint64_t)0, graph.hedges),
+        [&](GNode h) {
+          auto edge = *(graph.edges(h).begin());
+          auto dst  = graph.getEdgeDst(edge);
+          auto ii   = graph.getData(dst).getPart();
+
+          bool flag = true;
+
+          for (auto n : graph.edges(h)) {
+            auto part = graph.getData(graph.getEdgeDst(n)).getPart();
+
+            if (part != ii) {
+              flag = false;
+              break;
+            }
+          }
+
+          if (flag)
+            graph.getData(h).setPart(ii);
+          else
+            graph.getData(h).setPart(100000);
+        },
+        galois::steal(), galois::loopname("distribute hedges"));
+
+    for (GNode h = 0; h < graph.hedges; h++) {
+      unsigned part = graph.getData(h).getPart();
+      if (part != 100000)
+        hedgevec[part].push_back(h);
+    }
+
+    // calling Partition for each partition number
+    for (unsigned i : toProcess) {
+      if (kValue[i] > 1) {
+        MetisGraph metisG;
+        GGraph& gr = *metisG.getGraph();
+
+        unsigned ed = 0;
+
+        for (auto h : hedgevec[i])
+          graph.getData(h).index = ed++;
+
+        unsigned id = ed;
+        for (auto n : nodesvec[i]) {
+          graph.getData(n).index = id++;
+        }
+
+        unsigned totalnodes = id;
+        galois::gstl::Vector<galois::PODResizeableArray<uint32_t>> edges_ids(
+            totalnodes);
+        std::vector<std::vector<EdgeTy>> edge_data(totalnodes);
+        std::vector<uint64_t> pre_edges(totalnodes);
+        unsigned edges = 0;
+
+        galois::do_all(
+            galois::iterate(hedgevec[i]),
+            [&](GNode h) {
+              for (auto v : graph.edges(h)) {
+                auto vv = graph.getEdgeDst(v);
+
+                uint32_t newid = graph.getData(h).index;
+                unsigned nm    = graph.getData(vv).index;
+                edges_ids[newid].push_back(nm);
+              }
+            },
+            galois::steal(), galois::loopname("populate edge ids"));
+
+        uint64_t num_edges_acc = 0;
+        //galois::do_all(
+          //  galois::iterate(uint32_t{0}, totalnodes),
+            for(uint32_t c = 0;c<totalnodes;c++) {
+              pre_edges[c] = edges_ids[c].size();
+              num_edges_acc += pre_edges[c];
+            }
+            //galois::steal(), galois::loopname("set pre edges"));
+
+        edges = num_edges_acc;
+
+        for (uint64_t c = 1; c < totalnodes; ++c) {
+          pre_edges[c] += pre_edges[c - 1];
+        }
+        gr.constructFrom(totalnodes, edges, pre_edges, edges_ids, edge_data);
+
+        gr.hedges = ed;
+        gr.hnodes = id - ed;
+
+        galois::do_all(
+            galois::iterate(gr),
+            [&](GNode n) {
+              if (n < gr.hedges)
+                gr.getData(n).netnum = n + 1;
+              else
+                gr.getData(n).netnum = INT_MAX;
+              gr.getData(n).netrand = INT_MAX;
+              gr.getData(n).netval  = INT_MAX;
+              gr.getData(n).nodeid  = n + 1;
+            },
+            galois::steal(), galois::loopname("build graph: recursion level"));
+
+        Partitions(&metisG, Csize, kValue[i]);
+
+        MetisGraph* mcg = &metisG;
+
+        // now free up the memory by deleting all coarsened graphs
+        while (mcg->getCoarserGraph() != NULL) {
+          mcg = mcg->getCoarserGraph();
+        }
+
+        while (mcg->getFinerGraph() != NULL &&
+               mcg->getFinerGraph()->getFinerGraph() != NULL) {
+          mcg = mcg->getFinerGraph();
+          delete mcg->getCoarserGraph();
+        }
+
+        int tmp                   = kValue[i];
+        kValue[i]                 = (tmp + 1) / 2;
+        kValue[i + (tmp + 1) / 2] = (tmp) / 2;
+        toProcessNew.insert(i);
+        toProcessNew.insert(i + (tmp + 1) / 2);
+
+        galois::do_all(
+            galois::iterate(nodesvec[i]),
+            [&](GNode v) {
+              GNode n     = graph.getData(v).index;
+              unsigned pp = gr.getData(n).getPart();
+              if (pp == 0) {
+                graph.getData(v).setPart(i);
+              } else if (pp == 1) {
+                graph.getData(v).setPart(i + (tmp + 1) / 2);
+              }
+            },
+            galois::steal(),
+            galois::loopname("set part: inside recursive call"));
+
+        delete mcg;
+      } // end if
+    }   // end for
+
+    toProcess = toProcessNew;
+    toProcessNew.clear();
+  } // end while
+  std::cout<<"Coarsening time(s):,"<<Ctime<<"\n";
+  std::cout<<"Partitiong time(s):,"<<Ptime<<"\n";
+  std::cout<<"Refinement time(s):,"<<Rtime<<"\n";
+  std::cout<<"\n";
+
+
+  return &metisGraph;
 }
 } //namespace

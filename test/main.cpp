@@ -1,7 +1,9 @@
 #include <iostream>
 #include "Bipart.h"
+#include "Metis.h"
 
 using namespace phydb;
+using namespace bipart;
 int main(int argc, char** argv) {
 
   PhyDB db;
@@ -12,9 +14,9 @@ int main(int argc, char** argv) {
   string defFileName = argv[2];//"benchmark_1K.def";
   db.ReadDef(defFileName);
 
-  int Csize = stoi(argv[3]);//25;
-  int Rsize = stoi(argv[4]);//2;
+  int Csize = stoi(argv[3]);//Coarsening levels;
+  int K = stoi(argv[4]);//number of partitions;
 
-  bipart::biparting(db, Csize, Rsize);
+  MetisGraph* metisgraph = biparting(db, Csize, K);
   return 0;
 };

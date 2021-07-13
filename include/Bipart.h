@@ -20,12 +20,14 @@
 #include <array>
 #include <unordered_set>
 
+//#include "/net/ohm/export/iss/sepideh/phyDB/include/phydb.h"
 #include "phydb/phydb.h"
+
 using namespace phydb;
 namespace bipart {
 void Partition(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K);
 
 int hash(unsigned val);
-void biparting(PhyDB& db, int Csize, int Rsize);
+MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K);
 
 }
