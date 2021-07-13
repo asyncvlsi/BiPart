@@ -20,7 +20,7 @@
 #include "galois/Galois.h"
 #include "galois/Reduction.h"
 #include "galois/Timer.h"
-#include "Metis.h"
+#include "Bipart.h"
 #include "galois/AtomicHelpers.h"
 #include <set>
 #include <iostream>

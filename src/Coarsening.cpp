@@ -17,7 +17,7 @@
  * Documentation, or loss or inaccuracy of data of any kind.
  */
 
-#include "Metis.h"
+#include "Bipart.h"
 #include "galois/Galois.h"
 #include "galois/AtomicHelpers.h"
 #include "galois/Reduction.h"
@@ -32,8 +32,6 @@
 namespace bipart {
 constexpr static const unsigned CHUNK_SIZE      = 512U;
 
-int TOTALW;
-int LIMIT;
 bool FLAG = false;
 namespace {
 
@@ -194,7 +192,7 @@ void parallelPrioRand(MetisGraph* graph, int iter) {
 template <MatchingPolicy matcher>
 void parallelHMatchAndCreateNodes(MetisGraph* graph, int iter, GNodeBag& bag,
                                   std::vector<bool>& hedges,
-                                  galois::LargeArray<unsigned>& weight) {
+                                  galois::LargeArray<unsigned>& weight, int lim) {
   parallelPrioRand<matcher>(graph, iter);
   GGraph* fineGGraph = graph->getFinerGraph()->getGraph();
   assert(fineGGraph != graph->getGraph());
@@ -223,7 +221,7 @@ void parallelHMatchAndCreateNodes(MetisGraph* graph, int iter, GNodeBag& bag,
             continue;
           }
           if (data.netnum == fineGGraph->getData(item).netnum) {
-            if (w + fineGGraph->getData(dst).getWeight() > LIMIT)
+            if (w + fineGGraph->getData(dst).getWeight() > lim)
               break;
             edges.push_back(dst);
             w += fineGGraph->getData(dst).getWeight();
@@ -386,14 +384,14 @@ void coarsePhaseII(MetisGraph* graph, std::vector<bool>& hedges,
 void findLoneNodes(GGraph& graph){
 	
 	galois::do_all(
-		galois::iterate((uint64_t) graph.hedges, graph.size()),
+		galois::iterate((uint64_t) graph.hedges, (uint64_t) graph.size()),
 			[&](GNode n){
 				
 				graph.getData(n).notAlone = false;
 			}, galois::steal(), galois::loopname("initialize not alone variables"));
 	
 	galois::do_all(
-		galois::iterate((uint64_t) 0, graph.hedges),
+		galois::iterate((uint64_t) 0, (uint64_t) graph.hedges),
 			[&](GNode h){
 
 				for(auto n:graph.edges(h))
@@ -598,7 +596,7 @@ void parallelCreateEdges(MetisGraph* graph, GNodeBag& bag,
 	inBag.deallocate();
 }
 
-void findMatching(MetisGraph* coarseMetisGraph, scheduleMode sch, int iter) {
+void findMatching(MetisGraph* coarseMetisGraph, scheduleMode sch, int iter, int lim) {
   MetisGraph* fineMetisGraph = coarseMetisGraph->getFinerGraph();
   GNodeBag nodes;
   int sz = coarseMetisGraph->getFinerGraph()->getGraph()->hedges;
@@ -609,39 +607,39 @@ void findMatching(MetisGraph* coarseMetisGraph, scheduleMode sch, int iter) {
   switch (sch) {
   case PLD:
     parallelHMatchAndCreateNodes<PLD_f>(coarseMetisGraph, iter, nodes, hedges,
-                                        weight);
+                                        weight, lim);
     break;
   case RAND:
     parallelHMatchAndCreateNodes<RAND_f>(coarseMetisGraph, iter, nodes, hedges,
-                                         weight);
+                                         weight, lim);
     break;
   case PP:
     parallelHMatchAndCreateNodes<PP_f>(coarseMetisGraph, iter, nodes, hedges,
-                                       weight);
+                                       weight, lim);
     break;
   case WD:
     parallelHMatchAndCreateNodes<WD_f>(coarseMetisGraph, iter, nodes, hedges,
-                                       weight);
+                                       weight, lim);
     break;
   case RI:
     parallelHMatchAndCreateNodes<RI_f>(coarseMetisGraph, iter, nodes, hedges,
-                                       weight);
+                                       weight, lim);
     break;
   case MRI:
     parallelHMatchAndCreateNodes<MRI_f>(coarseMetisGraph, iter, nodes, hedges,
-                                        weight);
+                                        weight, lim);
     break;
   case MWD:
     parallelHMatchAndCreateNodes<MWD_f>(coarseMetisGraph, iter, nodes, hedges,
-                                        weight);
+                                        weight, lim);
     break;
   case DEG:
     parallelHMatchAndCreateNodes<DEG_f>(coarseMetisGraph, iter, nodes, hedges,
-                                        weight);
+                                        weight, lim);
     break;
   case MDEG:
     parallelHMatchAndCreateNodes<MDEG_f>(coarseMetisGraph, iter, nodes, hedges,
-                                         weight);
+                                         weight, lim);
     break;
   default:
     abort();
@@ -654,9 +652,9 @@ void findMatching(MetisGraph* coarseMetisGraph, scheduleMode sch, int iter) {
 }
 
 MetisGraph* coarsenOnce(MetisGraph* fineMetisGraph, scheduleMode sch,
-                        int iter) {
+                        int iter, int lim) {
   MetisGraph* coarseMetisGraph = new MetisGraph(fineMetisGraph);
-  findMatching(coarseMetisGraph, sch, iter);
+  findMatching(coarseMetisGraph, sch, iter, lim);
   return coarseMetisGraph;
 }
 
@@ -673,7 +671,7 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
   const float ratio  = 55.0 / 45.0;
   const float tol    = std::max(ratio, 1 - ratio) - 1;
   const int hi       = (1 + tol) * size / (2 + tol);
-  LIMIT              = hi / 4;
+  int LIMIT              = hi / 4;
 
   unsigned Size    = size;
   unsigned iterNum = 0;
@@ -682,7 +680,7 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
     if (Size - newSize <= 0 && iterNum > 2)
       break; 
     newSize     = coarseGraph->getGraph()->hnodes;
-    coarseGraph = coarsenOnce(coarseGraph, sch, iterNum);
+    coarseGraph = coarsenOnce(coarseGraph, sch, iterNum, LIMIT);
     Size        = coarseGraph->getGraph()->hnodes;
     hedgeSize   = coarseGraph->getGraph()->hedges;
     std::cout << "SIZE IS " << coarseGraph->getGraph()->hnodes << " and net is "

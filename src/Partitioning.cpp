@@ -19,7 +19,7 @@
 
 #include "galois/Galois.h"
 #include "galois/Timer.h"
-#include "Metis.h"
+#include "Bipart.h"
 #include <set>
 #include "galois/Galois.h"
 #include "galois/AtomicHelpers.h"

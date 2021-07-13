@@ -149,7 +149,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 include_directories(include)
-FILE(GLOB CPP_SOURCES "src/*.cpp")
+FILE(GLOB CPP_SOURCES src/*.cpp)
+list(FILTER CPP_SOURCES EXCLUDE REGEX main)
 FILE(GLOB C_SOURCES "src/*.c")
 add_subdirectory(test)
 
@@ -157,12 +158,12 @@ add_library(bipart
     STATIC
     ${CPP_SOURCES} ${C_SOURCES})
 target_link_libraries(bipart
-    lef def galois_shmem pthread numa)
+    lef def galois_shmem pthread)
 
-add_executable(lefdef-bipart
-    test/main.cpp)
-target_link_libraries(lefdef-bipart
-    lef def galois_shmem bipart pthread numa phydb)
+#add_executable(lefdef-bipart
+#    test/main.cpp)
+#target_link_libraries(lefdef-bipart
+#    lef def galois_shmem bipart pthread phydb)
 
 ######################################
 # specify the installation directory: ${ACT_HOME}

@@ -17,7 +17,7 @@
  * Documentation, or loss or inaccuracy of data of any kind.
  */
 
-#include "Metis.h"
+#include "Bipart.h"
 
 #include <iomanip>
 #include <iostream>
