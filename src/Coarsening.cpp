@@ -29,6 +29,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+using namespace phydb;
+
 namespace bipart {
 constexpr static const unsigned CHUNK_SIZE      = 512U;
 

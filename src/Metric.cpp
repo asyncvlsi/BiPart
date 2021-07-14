@@ -23,6 +23,8 @@
 #include <iostream>
 #include <numeric>
 
+using namespace phydb;
+
 namespace bipart {
 struct onlineStat {
   unsigned num;

@@ -31,6 +31,8 @@
 #include <climits>
 #include <array>
 
+using namespace phydb;
+
 namespace bipart {
 // final
 void initGain(GGraph& g) {

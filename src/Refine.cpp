@@ -26,6 +26,8 @@
 #include <iostream>
 #include <fstream>
 
+using namespace phydb;
+
 namespace bipart{
 
 void projectPart(MetisGraph* Graph) {

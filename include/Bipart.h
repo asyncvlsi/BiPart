@@ -23,11 +23,10 @@
 //#include "/net/ohm/export/iss/sepideh/phyDB/include/phydb.h"
 #include "phydb/phydb.h"
 
-using namespace phydb;
 namespace bipart {
 void Partition(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K);
 
 int hash(unsigned val);
-MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K);
+MetisGraph* biparting(phydb::PhyDB& db, unsigned Csize, unsigned K);
 
 }
