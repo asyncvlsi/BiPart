@@ -41,11 +41,9 @@ void Partitions(MetisGraph* metisGraph, unsigned coarsenTo, unsigned K) {
 
 
 MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
-  //galois::SharedMemSys G;
 
-
-  MetisGraph metisGraph;
-  GGraph& graph = *metisGraph.getGraph();
+  MetisGraph *mG = new MetisGraph();
+  GGraph& graph = *(mG->getGraph());
 
   auto &phy_db_design = *(db.GetDesignPtr());
 
@@ -62,8 +60,10 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
 
   uint32_t hedges = nets_count;
   uint64_t nodes  = components_count;
+#if 0
   std::cout << "Nets: " << hedges << "\n";
   std::cout << "std cells: " << nodes << "\n\n";
+#endif
 
   galois::gstl::Vector<galois::PODResizeableArray<uint32_t>> edges_id(hedges +
                                                                       nodes);
@@ -106,7 +106,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   graph.hedges = hedges;
   graph.hnodes = nodes;
 
-  galois::do_all(galois::iterate(uint32_t{0}, sizes),
+  galois::do_all(galois::iterate(uint32_t{0}, (uint32_t) sizes),
                  [&](uint32_t c) { prefix_edges[c] = edges_id[c].size(); });
 
   for (uint64_t c = 1; c < nodes + hedges; ++c) {
@@ -145,7 +145,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
       },
       galois::steal(), galois::loopname("initPart"));
 
-  Partitions(&metisGraph, Csize, K);
+  Partitions(mG, Csize, K);
 
   const int k = K;
   // calculating number of iterations/levels required
@@ -159,7 +159,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   kValue[(k + 1) / 2] = k / 2;
 
   galois::do_all(
-      galois::iterate((uint64_t)graph.hedges, graph.size()),
+      galois::iterate((uint64_t)graph.hedges, (uint64_t)graph.size()),
       [&](GNode n) {
         unsigned pp = graph.getData(n).getPart();
         if (pp == 1) {
@@ -195,7 +195,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
 
     // distribute hyperedges according to their current partition
     galois::do_all(
-        galois::iterate((uint64_t)0, graph.hedges),
+        galois::iterate((uint64_t)0, (uint64_t)graph.hedges),
         [&](GNode h) {
           auto edge = *(graph.edges(h).begin());
           auto dst  = graph.getEdgeDst(edge);
@@ -335,12 +335,13 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
     toProcess = toProcessNew;
     toProcessNew.clear();
   } // end while
+#if 0
   std::cout<<"Coarsening time(s):,"<<Ctime<<"\n";
   std::cout<<"Partitiong time(s):,"<<Ptime<<"\n";
   std::cout<<"Refinement time(s):,"<<Rtime<<"\n";
   std::cout<<"\n";
+#endif
 
-
-  return &metisGraph;
+  return mG;
 }
 } //namespace
