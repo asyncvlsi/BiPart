@@ -76,7 +76,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
     std::map<int, MetisNode> mapNodeId;
     for (auto &comp: components) {
       std::string blk_name(comp.GetName());
-      std::string blk_type_name(comp.GetMacroName());
+      std::string blk_type_name(comp.GetMacro()->GetName());
       auto location = comp.GetLocation();
       int llx = location.x;
       int lly = location.y;
