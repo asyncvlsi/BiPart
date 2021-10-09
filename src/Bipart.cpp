@@ -91,7 +91,8 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
     uint32_t cnt = 0;
     for (auto &net: nets) {
       std::string net_name(net.GetName());
-      auto &comp_names = net.GetComponentNamesRef();
+      //auto &comp_names = net.GetComponentNamesRef();
+      auto &comp_names = net.GetIoPinNamesRef();
       int sz = comp_names.size();
       for (int i = 0; i < sz; ++i) {
         auto valn = mapNodes[comp_names[i]];
