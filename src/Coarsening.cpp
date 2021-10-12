@@ -678,7 +678,7 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
   unsigned Size    = size;
   unsigned iterNum = 0;
   unsigned newSize = size;
-  while (iterNum < coarsenTo) {
+  while (iterNum < coarsenTo && Size > 1000) {
     if (Size - newSize <= 0 && iterNum > 2)
       break; 
     newSize     = coarseGraph->getGraph()->hnodes;
