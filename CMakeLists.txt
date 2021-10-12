@@ -1,51 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(lefdef-bipart
+project(bipart
     LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
-######################################
-# detect the installation path of LEF parser and DEF parser,
-# and check if the liblef and libdef library can be found or not
-######################################
-message(STATUS "Detecting environment variable LEF_ROOT...")
-if (DEFINED ENV{LEF_ROOT})
-    message(STATUS "Environment variable LEF_ROOT detected: " $ENV{LEF_ROOT})
-else ()
-    message(FATAL_ERROR "Environment variable LEF_ROOT not found")
-endif ()
-include_directories($ENV{LEF_ROOT}/include)
-link_directories($ENV{LEF_ROOT}/lib)
-find_library(LEF_LIBRARY
-    NAMES lef
-    PATHS $ENV{LEF_ROOT}/lib
-    REQUIRED)
-if (NOT LEF_LIBRARY)
-    message(FATAL_ERROR "liblef.a is not found")
-else ()
-    message(STATUS "liblef.a found")
-endif()
-
-message(STATUS "Detecting environment variable DEF_ROOT...")
-if (DEFINED ENV{DEF_ROOT})
-    message(STATUS "Environment variable DEF_ROOT detected: " $ENV{DEF_ROOT})
-else ()
-    message(FATAL_ERROR "Environment variable DEF_ROOT not found")
-endif ()
-include_directories($ENV{DEF_ROOT}/include)
-link_directories($ENV{DEF_ROOT}/lib)
-find_library(DEF_LIBRARY
-    NAMES def
-    PATHS $ENV{DEF_ROOT}/lib
-    REQUIRED)
-if (NOT DEF_LIBRARY)
-    message(FATAL_ERROR "libdef.a is not found")
-else ()
-    message(STATUS "libdef.a found")
-endif()
 
 message(STATUS "Detecting environment variable $ENV{GALOIS_INCLUDE}...")
 if (DEFINED ENV{GALOIS_INCLUDE})
@@ -158,10 +119,10 @@ add_library(bipart
     STATIC
     ${CPP_SOURCES} ${C_SOURCES})
 target_link_libraries(bipart
-    lef def galois_shmem pthread)
+     galois_shmem pthread)
 
-#add_executable(lefdef-bipart
-#    test/main.cpp)
+   #add_executable(phyDBbipart
+   #test/main.cpp)
 #target_link_libraries(lefdef-bipart
 #    lef def galois_shmem bipart pthread phydb)
 
