@@ -5,7 +5,44 @@ project(bipart
 
 set(CMAKE_CXX_STANDARD 17)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
+
+message(STATUS "Detecting environment variable LEF_ROOT...")
+if (DEFINED ENV{LEF_ROOT})
+    message(STATUS "Environment variable LEF_ROOT detected: " $ENV{LEF_ROOT})
+else ()
+    message(FATAL_ERROR "Environment variable LEF_ROOT not found")
+endif ()
+include_directories($ENV{LEF_ROOT}/include)
+link_directories($ENV{LEF_ROOT}/lib)
+find_library(LEF_LIBRARY
+    NAMES lef
+    PATHS $ENV{LEF_ROOT}/lib
+    REQUIRED)
+if (NOT LEF_LIBRARY)
+    message(FATAL_ERROR "liblef.a is not found")
+else ()
+    message(STATUS "liblef.a found")
+endif()
+
+message(STATUS "Detecting environment variable DEF_ROOT...")
+if (DEFINED ENV{DEF_ROOT})
+    message(STATUS "Environment variable DEF_ROOT detected: " $ENV{DEF_ROOT})
+else ()
+    message(FATAL_ERROR "Environment variable DEF_ROOT not found")
+endif ()
+include_directories($ENV{DEF_ROOT}/include)
+link_directories($ENV{DEF_ROOT}/lib)
+find_library(DEF_LIBRARY
+    NAMES def
+    PATHS $ENV{DEF_ROOT}/lib
+    REQUIRED)
+if (NOT DEF_LIBRARY)
+    message(FATAL_ERROR "libdef.a is not found")
+else ()
+    message(STATUS "libdef.a found")
+endif()
+
 
 
 message(STATUS "Detecting environment variable $ENV{GALOIS_INCLUDE}...")
@@ -15,21 +52,54 @@ else ()
     message(FATAL_ERROR "Environment variable $ENV{GALOIS_INCLUDE} not found")
 endif ()
 
-#find_package(LLVM REQUIRED CONFIG)
-#if("${LLVM_PACKAGE_VERSION}" VERSION_LESS "7")
-#  message(FATAL_ERROR "LLVM 7 or greater is required.")
-#endif()
-#if(NOT DEFINED LLVM_ENABLE_RTTI)
-#  message(FATAL_ERROR "Could not determine if LLVM has RTTI enabled.")
-#endif()
-#if(NOT ${LLVM_ENABLE_RTTI})
-#  message(FATAL_ERROR "Galois requires a build of LLVM that includes RTTI. Most package managers do this already, but if you built LLVM from source you need to configure it with `-DLLVM_ENABLE_RTTI=ON`")
-#endif()
-#target_include_directories(LLVMSupport INTERFACE ${LLVM_INCLUDE_DIRS})
+
+
+message(STATUS "Detecting Galois libraries...")
+set(Galois_FOUND TRUE)
+find_library(
+    GALOIS_EDA_LIBRARY
+    NAMES galois_eda
+    PATHS $ENV{ACT_HOME}/lib
+)
+set(Galois_LIBRARIES ${GALOIS_EDA_LIBRARY})
+if (GALOIS_EDA_LIBRARY)
+    message(STATUS "Found libgalois_eda.a: " ${GALOIS_EDA_LIBRARY})
+else()
+    message(STATUS "Cannot find libgalois_eda.a")
+    set(Galois_FOUND FALSE)
+endif()
+find_library(
+    GALOIS_SHMEM_LIBRARY
+    NAMES galois_shmem
+    PATHS $ENV{ACT_HOME}/lib
+)
+set(Galois_LIBRARIES ${Galois_LIBRARIES} ${GALOIS_SHMEM_LIBRARY})
+if (GALOIS_SHMEM_LIBRARY)
+    message(STATUS "Found libgalois_shmem.a: " ${GALOIS_SHMEM_LIBRARY})
+else()
+    message(STATUS "Cannot find libgalois_shmem.a")
+    set(Galois_FOUND FALSE)
+endif()
+if (UNIX)
+    find_library(
+        NUMA_LIBRARY
+        NAMES numa
+    )
+    set(Galois_LIBRARIES ${Galois_LIBRARIES} ${NUMA_LIBRARY})
+    if (NUMA_LIBRARY)
+        message(STATUS "Found libnuma: " ${NUMA_LIBRARY})
+    else()
+        message(STATUS "Cannot find libnuma")
+        set(Galois_FOUND FALSE)
+    endif()
+endif()
+
 
 
 
 include_directories($ENV{GALOIS_INCLUDE})
+#include_directories($ENV{PHYDB_INCLUDE})
+#include_directories("/net/ohm/export/iss/sepideh/act/install/include")
 #include_directories("/net/ohm/export/cdgc/michael/GaloisCpp-github/Galois/lonestar/liblonestar/include")
 #include_directories("/net/ohm/export/iss/sepideh/Galois/libgalois/include")
 #include_directories("/net/ohm/export/iss/sepideh/Galois/build/libgalois/include")
@@ -46,19 +116,6 @@ else ()
     message(STATUS "libgalois_shmem.a found")
 endif()
 
-
-if(GALOIS_ENABLE_VTUNE)
-  set(VTune_ROOT /opt/intel/vtune_amplifier)
-  find_package(VTune REQUIRED)
-  include_directories(${VTune_INCLUDE_DIRS})
-  add_definitions(-DGALOIS_ENABLE_VTUNE)
-
-    set(VTune_LIBRARY_PATH_CANDIDATES lib lib64 lib32 bin64/k1om bin32/k1om)
-    find_path(VTune_INCLUDE_DIRS ittnotify.h PATHS ${VTune_ROOT} PATH_SUFFIXES include)
-    find_library(VTune_LIBRARY NAMES ittnotify PATHS ${VTune_ROOT} PATH_SUFFIXES ${VTune_LIBRARY_PATH_CANDIDATES})
-    find_library(VTune_LIBRARIES NAMES dl PATH_SUFFIXES lib lib64 lib32)
-    link_directories(/opt/intel/oneapi/vtune/latest/lib64/)
-endif()
 
 
 message(STATUS "Detecting environment variable $ENV{ACT_HOME}...")
@@ -110,21 +167,27 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 include_directories(include)
-FILE(GLOB CPP_SOURCES src/*.cpp)
-list(FILTER CPP_SOURCES EXCLUDE REGEX main)
-FILE(GLOB C_SOURCES "src/*.c")
+FILE(GLOB SOURCES "src/*.cpp")
+#list(FILTER CPP_SOURCES EXCLUDE REGEX main)
+#FILE(GLOB C_SOURCES "src/*.c")
 add_subdirectory(test)
 
 add_library(bipart 
     STATIC
-    ${CPP_SOURCES} ${C_SOURCES})
-target_link_libraries(bipart
-     galois_shmem pthread)
+    ${SOURCES})
 
-   #add_executable(phyDBbipart
-   #test/main.cpp)
-#target_link_libraries(lefdef-bipart
-#    lef def galois_shmem bipart pthread phydb)
+
+target_link_libraries(bipart
+  lef def phydb galois_shmem galois_eda numa pthread)
+
+add_executable(bipart_test
+  test/main.cpp)
+
+target_link_libraries(bipart_test
+  lef def galois_shmem galois_eda numa bipart phydb pthread)
+
+
+
 
 ######################################
 # specify the installation directory: ${ACT_HOME}

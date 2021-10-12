@@ -44,7 +44,6 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
 
   MetisGraph *mG = new MetisGraph();
   GGraph& graph = *(mG->getGraph());
-
   auto &phy_db_design = *(db.GetDesignPtr());
 
   int components_count = 0, pins_count = 0, nets_count = 0;
@@ -54,16 +53,14 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   pins_count = iopins.size();
   auto &nets = phy_db_design.GetNetsRef();
   nets_count = nets.size();
-  auto die_area = phy_db_design.GetDieArea();
-  int LLX = die_area.LLX();
-  int LLY = die_area.LLX();
 
   uint32_t hedges = nets_count;
   uint64_t nodes  = components_count;
-#if 0
-  std::cout << "Nets: " << hedges << "\n";
-  std::cout << "std cells: " << nodes << "\n\n";
-#endif
+  //std::cout<<"nodes "<<nodes<<" nets " <<hedges<<"\n";
+  if (hedges < 1) { 
+    std::cout<<"0 nets\n";
+    return mG;
+  }
 
   galois::gstl::Vector<galois::PODResizeableArray<uint32_t>> edges_id(hedges +
                                                                       nodes);
@@ -71,38 +68,41 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   std::vector<uint64_t> prefix_edges(nodes + hedges);
   std::vector<int> weights(hedges);
   uint32_t edges = 0;
-    unsigned nodeid = hedges;
-    std::map<std::string, MetisNode> mapNodes;
-    std::map<int, MetisNode> mapNodeId;
-    for (auto &comp: components) {
-      std::string blk_name(comp.GetName());
-      std::string blk_type_name(comp.GetMacro()->GetName());
-      auto location = comp.GetLocation();
-      int llx = location.x;
-      int lly = location.y;
+  unsigned nodeid = hedges;
+  std::map<std::string, MetisNode> mapNodes;
+  std::map<int, MetisNode> mapNodeId;
+  for (auto &comp: components) {
+    std::string blk_name(comp.GetName());
+    std::string blk_type_name(comp.GetMacro()->GetName());
      // GNode node;
-      MetisNode n1;
-      n1.name = blk_name;
-      n1.area = llx*lly;
-      n1.nodeid = nodeid++;
-      mapNodes[blk_name] = n1;
-      mapNodeId[n1.nodeid] = n1;
-    }
-    uint32_t cnt = 0;
-    for (auto &net: nets) {
-      std::string net_name(net.GetName());
+    MetisNode n1;
+    n1.name = blk_name;
+    n1.nodeid = nodeid++;
+    mapNodes[blk_name] = n1;
+    mapNodeId[n1.nodeid] = n1;
+  }
+  uint32_t cnt = 0;
+  for (auto &net: nets) {
+    std::string net_name(net.GetName());
       //auto &comp_names = net.GetComponentNamesRef();
-      auto &comp_names = net.GetIoPinNamesRef();
-      int sz = comp_names.size();
-      for (int i = 0; i < sz; ++i) {
-        auto valn = mapNodes[comp_names[i]];
-        int val = valn.nodeid;
-        unsigned newval = (val);
-        edges_id[cnt].push_back(newval);
-        edges++;
-        cnt++;
-      }
+    auto &comp_names = net.GetIoPinNamesRef();
+    auto pins = net.GetPinsRef();
+    int sz = comp_names.size();
+    if (sz< 1) { 
+      std::cout<<"pin name is not defined\n";
+    return mG;
+  }
+    for (int i = 0; i < comp_names.size(); ++i) {
+    //for (auto v : pins) {
+
+      auto valn = mapNodes[comp_names[i]];
+      int val = valn.nodeid;
+      unsigned newval = (val);
+      edges_id[cnt].push_back(newval);
+      edges++;
+      cnt++;
     }
+  }
   uint32_t sizes = hedges + nodes;
   graph.hedges = hedges;
   graph.hnodes = nodes;
@@ -127,7 +127,6 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
           graph.getData(n).netnum = INT_MAX;
           MetisNode n1 = mapNodeId[n];
           graph.getData(n).nodeid  = n + 1;
-          graph.getData(n).area = n1.area;
           graph.getData(n).name = n1.name;
         }
         graph.getData(n).netrand = INT_MAX;
@@ -168,6 +167,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
         }
       },
       galois::steal(), galois::loopname("set part (original graph)"));
+  
 
   // running it level by level
 
@@ -336,13 +336,6 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
     toProcess = toProcessNew;
     toProcessNew.clear();
   } // end while
-#if 0
-  std::cout<<"Coarsening time(s):,"<<Ctime<<"\n";
-  std::cout<<"Partitiong time(s):,"<<Ptime<<"\n";
-  std::cout<<"Refinement time(s):,"<<Rtime<<"\n";
-  std::cout<<"\n";
-#endif
-
   return mG;
 }
 } //namespace
