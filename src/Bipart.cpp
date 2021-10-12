@@ -71,37 +71,47 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   unsigned nodeid = hedges;
   std::map<std::string, MetisNode> mapNodes;
   std::map<int, MetisNode> mapNodeId;
-  for (auto &comp: components) {
-    std::string blk_name(comp.GetName());
-    std::string blk_type_name(comp.GetMacro()->GetName());
-     // GNode node;
-    MetisNode n1;
-    n1.name = blk_name;
-    n1.nodeid = nodeid++;
-    mapNodes[blk_name] = n1;
-    mapNodeId[n1.nodeid] = n1;
-  }
   uint32_t cnt = 0;
   for (auto &net: nets) {
     std::string net_name(net.GetName());
       //auto &comp_names = net.GetComponentNamesRef();
-    auto &comp_names = net.GetIoPinNamesRef();
-    auto pins = net.GetPinsRef();
-    int sz = comp_names.size();
+    //auto &comp_names = net.GetIoPinNamesRef();
+    //auto pins = net.GetPinsRef();
+    int sz = net.pins_.size();
     if (sz< 1) { 
       std::cout<<"pin name is not defined\n";
     return mG;
   }
-    for (int i = 0; i < comp_names.size(); ++i) {
+    //for (int i = 0; i < comp_names.size(); ++i) {
     //for (auto v : pins) {
-
-      auto valn = mapNodes[comp_names[i]];
-      int val = valn.nodeid;
-      unsigned newval = (val);
-      edges_id[cnt].push_back(newval);
-      edges++;
-      cnt++;
+    for (auto &pin: net.pins_) {
+            std::string component_name =
+                phy_db_design.components_[pin.comp_id].GetName();
+            std::string macro_name =
+                phy_db_design.components_[pin.comp_id].GetMacro()->GetName();
+            Macro *macro_ptr = db.GetMacroPtr(macro_name);
+            //PhyDBExpects(macro_ptr != nullptr, "Macro does not exist");
+            std::string
+                pin_name = macro_ptr->GetPinsRef()[pin.pin_id].GetName();
+      auto it = mapNodes.find(pin_name);
+      if (it != mapNodes.end()) {
+        auto valn = it->second;
+        int val = valn.nodeid;
+        unsigned newval = (val);
+        edges_id[cnt].push_back(newval);
+        edges++;
+      }
+      else {
+        MetisNode n1;
+        n1.name = pin_name;
+        n1.nodeid = nodeid++;
+        mapNodes[pin_name] = n1;
+        mapNodeId[n1.nodeid] = n1;
+        edges_id[cnt].push_back(n1.nodeid);
+        edges++;
+      }
     }
+    cnt++;
   }
   uint32_t sizes = hedges + nodes;
   graph.hedges = hedges;
