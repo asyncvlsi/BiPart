@@ -110,7 +110,6 @@ __attribute__((unused)) void unlocked(GGraph& g) {
 // refine
 void parallel_refine_KF(GGraph& g, float, unsigned refineTo) {
 
-  // std::cout<<"in parallel balance\n";
   typedef galois::gstl::Vector<unsigned> VecTy;
   typedef galois::substrate::PerThreadStorage<VecTy> ThreadLocalData;
   ThreadLocalData edgesThreadLocal;
@@ -129,13 +128,8 @@ void parallel_refine_KF(GGraph& g, float, unsigned refineTo) {
       },
       galois::loopname("make balance"));
   unsigned pass = 0;
-  // std::cout<<"cut parallel "<<calculate_cutsize(g)<<"\n";
-  // initGain(g);
   while (pass < refineTo) {
-    // T.start();
     initGains(g, refineTo);
-    // T.stop();
-    // std::cout<<"init gain time "<<T.get()<<" for round "<<pass<<"\n";
     GNodeBag nodelistz;
     GNodeBag nodelisto;
     unsigned zeroW = 0;

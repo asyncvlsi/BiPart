@@ -238,7 +238,7 @@ void parallelHMatchAndCreateNodes(MetisGraph* graph, int iter, GNodeBag& bag,
             return;
           fineGGraph->getData(item).setMatched();
           if (flag)
-						hedge_bag.push(item);
+	hedge_bag.push(item);
           
           bag.push(nodeid);
           unsigned ww = 0;
@@ -382,25 +382,6 @@ void coarsePhaseII(MetisGraph* graph, std::vector<bool>& hedges,
 				hedges[item] = true;
 }
 
-//find nodes that are not incident to any hyperedge
-void findLoneNodes(GGraph& graph){
-	
-	galois::do_all(
-		galois::iterate((uint64_t) graph.hedges, (uint64_t) graph.size()),
-			[&](GNode n){
-				
-				graph.getData(n).notAlone = false;
-			}, galois::steal(), galois::loopname("initialize not alone variables"));
-	
-	galois::do_all(
-		galois::iterate((uint64_t) 0, (uint64_t) graph.hedges),
-			[&](GNode h){
-
-				for(auto n:graph.edges(h))
-					graph.getData(graph.getEdgeDst(n)).notAlone = true;
-			}, galois::steal(), galois::loopname("set not alone variables"));
-}
-
 //create coarsened graphs
 void parallelCreateEdges(MetisGraph* graph, GNodeBag& bag,
                          std::vector<bool>& hedges,
@@ -419,7 +400,6 @@ void parallelCreateEdges(MetisGraph* graph, GNodeBag& bag,
       galois::steal(), galois::loopname("number of hyperedges loop"));
  
 	//find lone nodes
-	findLoneNodes(*fineGGraph);
  
 
 	galois::do_all(
@@ -437,45 +417,7 @@ void parallelCreateEdges(MetisGraph* graph, GNodeBag& bag,
       galois::steal(), galois::loopname("noedgebag match"));
 
   
-	galois::StatTimer T_BAG("BAG");
-	T_BAG.start();
-	std::vector<bool> inNodeBag(1000, false);
-	std::vector<unsigned> nodeid(1000, INT_MAX);
-
-	for(GNode ii = fineGGraph->hedges; ii<fineGGraph->size();ii++){
-		
-		if(!fineGGraph->getData(ii).isMatched() && !fineGGraph->getData(ii).notAlone){
-			int index = ii%1000;
-			inNodeBag[index] = true;
-			if(ii < nodeid[index])
-				nodeid[index] = ii;
-			
-		}
-	}
-
-	for(int i=0;i<1000;i++){
-	
-		if(inNodeBag[i]){
-			bag.push(nodeid[i]);
-			weight[nodeid[i]-fineGGraph->hedges] =  0;
-		}
-	}
-
-	for(GNode ii = fineGGraph->hedges; ii<fineGGraph->size();ii++){
-
-    if(!fineGGraph->getData(ii).isMatched() && !fineGGraph->getData(ii).notAlone){
-      int index = ii%1000;
-   		fineGGraph->getData(ii).setMatched();
-      fineGGraph->getData(ii).setParent(nodeid[index]);
-      fineGGraph->getData(ii).netnum =  INT_MAX;
-  
-      weight[nodeid[index]-fineGGraph->hedges] += fineGGraph->getData(ii).getWeight();   
-    }
-  }
-	T_BAG.stop();
-
-	//std::cout <<"bag time: "<< T_BAG.get() << std::endl;
-	unsigned hnum   = hg.reduce();
+  unsigned hnum   = hg.reduce();
   unsigned nodes  = std::distance(bag.begin(), bag.end()); // + numnodes;
   unsigned newval = hnum;
   
@@ -683,6 +625,13 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
       break; 
     newSize     = coarseGraph->getGraph()->hnodes;
     coarseGraph = coarsenOnce(coarseGraph, sch, iterNum, LIMIT);
+    GGraph* gg = coarseGraph->getFinerGraph()->getGraph();
+    galois::do_all(
+      galois::iterate(gg->hedges, gg->size()),
+      [&](GNode ii) {
+        
+          gg->getData(ii).setParent(ii);
+      },galois::steal(), galois::loopname("SetParent"));
     Size        = coarseGraph->getGraph()->hnodes;
     hedgeSize   = coarseGraph->getGraph()->hedges;
     if (hedgeSize < 1000)
