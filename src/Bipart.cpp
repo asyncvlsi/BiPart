@@ -56,9 +56,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
 
   uint32_t hedges = nets_count;
   uint64_t nodes  = components_count;
-  std::cout<<"nodes "<<nodes<<" nets " <<hedges<<"\n";
   if (hedges < 1) { 
-    std::cout<<"0 nets\n";
     return mG;
   }
 
