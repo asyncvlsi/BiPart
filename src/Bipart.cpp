@@ -47,18 +47,27 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   auto &phy_db_design = *(db.GetDesignPtr());
 
   int components_count = 0, pins_count = 0, nets_count = 0;
-  auto &components = phy_db_design.GetComponentsRef();
-  components_count = components.size();
-  auto &iopins = phy_db_design.GetIoPinsRef();
-  pins_count = iopins.size();
+  std::map<std::string, int> mapNodes;
+  std::map<int, std::string> mapNodeId;
+  //auto &iopins = phy_db_design.GetIoPinsRef();
+  //pins_count = iopins.size();
   auto &nets = phy_db_design.GetNetsRef();
   nets_count = nets.size();
 
   uint32_t hedges = nets_count;
-  uint64_t nodes  = components_count;
   if (hedges < 1) { 
     return mG;
   }
+  unsigned nodeid = hedges;
+  auto &components = phy_db_design.GetComponentsRef();
+  components_count = components.size();
+  uint64_t nodes  = components_count;
+  for (auto com : components) {
+      std::string node_name = com.name_;
+        mapNodes[node_name] = nodeid;
+        mapNodeId[nodeid] = node_name;
+        nodeid++;
+      }
 
   galois::gstl::Vector<galois::PODResizeableArray<uint32_t>> edges_id(hedges +
                                                                       nodes);
@@ -66,48 +75,17 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   std::vector<uint64_t> prefix_edges(nodes + hedges);
   std::vector<int> weights(hedges);
   uint32_t edges = 0;
-  unsigned nodeid = hedges;
-  std::map<std::string, MetisNode> mapNodes;
-  std::map<int, MetisNode> mapNodeId;
   uint32_t cnt = 0;
   for (auto &net: nets) {
     std::string net_name(net.GetName());
-      //auto &comp_names = net.GetComponentNamesRef();
-    //auto &comp_names = net.GetIoPinNamesRef();
-    //auto pins = net.GetPinsRef();
     int sz = net.pins_.size();
-    if (sz< 1) { 
-      std::cout<<"pin name is not defined\n";
-    return mG;
-  }
-    //for (int i = 0; i < comp_names.size(); ++i) {
-    //for (auto v : pins) {
     for (auto &pin: net.pins_) {
             std::string component_name =
                 phy_db_design.components_[pin.comp_id].GetName();
-            std::string macro_name =
-                phy_db_design.components_[pin.comp_id].GetMacro()->GetName();
-            Macro *macro_ptr = db.GetMacroPtr(macro_name);
-            //PhyDBExpects(macro_ptr != nullptr, "Macro does not exist");
-            std::string
-                pin_name = macro_ptr->GetPinsRef()[pin.pin_id].GetName();
-      auto it = mapNodes.find(pin_name);
-      if (it != mapNodes.end()) {
-        auto valn = it->second;
-        int val = valn.nodeid;
-        unsigned newval = (val);
+        int valn = mapNodes[component_name];
+        unsigned newval = (valn);
         edges_id[cnt].push_back(newval);
         edges++;
-      }
-      else {
-        MetisNode n1;
-        n1.name = pin_name;
-        n1.nodeid = nodeid++;
-        mapNodes[pin_name] = n1;
-        mapNodeId[n1.nodeid] = n1;
-        edges_id[cnt].push_back(n1.nodeid);
-        edges++;
-      }
     }
     cnt++;
   }
@@ -128,14 +106,13 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
       galois::iterate(graph),
       [&](GNode n) {
         if (n < hedges) {
-          graph.getData(n).netnum = n + 1;
-          graph.getData(n).nodeid  = n + 1;
+          graph.getData(n).netnum = n;
+          graph.getData(n).nodeid  = n;
         }
         else {
           graph.getData(n).netnum = INT_MAX;
-          MetisNode n1 = mapNodeId[n];
-          graph.getData(n).nodeid  = n + 1;
-          graph.getData(n).name = n1.name;
+          graph.getData(n).nodeid  = n;
+          graph.getData(n).name = mapNodeId[n];
         }
         graph.getData(n).netrand = INT_MAX;
         graph.getData(n).netval  = INT_MAX;

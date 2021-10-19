@@ -626,12 +626,6 @@ MetisGraph* coarsen(MetisGraph* fineMetisGraph, unsigned coarsenTo,
     newSize     = coarseGraph->getGraph()->hnodes;
     coarseGraph = coarsenOnce(coarseGraph, sch, iterNum, LIMIT);
     GGraph* gg = coarseGraph->getFinerGraph()->getGraph();
-    galois::do_all(
-      galois::iterate(gg->hedges, gg->size()),
-      [&](GNode ii) {
-        
-          gg->getData(ii).setParent(ii);
-      },galois::steal(), galois::loopname("SetParent"));
     Size        = coarseGraph->getGraph()->hnodes;
     hedgeSize   = coarseGraph->getGraph()->hedges;
     if (hedgeSize < 1000)
