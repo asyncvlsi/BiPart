@@ -5,16 +5,43 @@ project(bipart
 
 set(CMAKE_CXX_STANDARD 17)
 
+message(STATUS "Detecting environment variable $ENV{ACT_HOME}...")
+if (DEFINED ENV{ACT_HOME})
+    message(STATUS "Environment variable ACT_HOME detected: " $ENV{ACT_HOME})
+else ()
+    message(FATAL_ERROR "Environment variable $ENV{ACT_HOME} not found")
+endif ()
+include_directories($ENV{ACT_HOME}/include)
+link_directories($ENV{ACT_HOME}/lib)
+find_library(PHYDB_LIBRARY
+    NAMES phydb
+    PATHS $ENV{ACT_HOME}/lib
+    REQUIRED)
+if (NOT PHYDB_LIBRARY)
+    link_directories($ENV{ACT_HOME}/lib)
+    set(PHYDB_LIBRARY $ENV{ACT_HOME}/lib)
+    #message(FATAL_ERROR "libphydb.a is not found")
+else ()
+  message(STATUS "libphydb.a found")
+endif()
+
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 message(STATUS "Detecting environment variable LEF_ROOT...")
+set(LEF_ROOT "")
 if (DEFINED ENV{LEF_ROOT})
     message(STATUS "Environment variable LEF_ROOT detected: " $ENV{LEF_ROOT})
+    include_directories($ENV{LEF_ROOT}/include)
+    link_directories($ENV{LEF_ROOT}/lib)
+    set(LEF_ROOT $ENV{LEF_ROOT})
 else ()
-    message(FATAL_ERROR "Environment variable LEF_ROOT not found")
+    message(STATUS "Environment variable LEF_ROOT not found, using ACT_HOME instead")
+    include_directories($ENV{ACT_HOME}/include)
+    link_directories($ENV{ACT_HOME}/lib)
+    set(LEF_ROOT $ENV{ACT_HOME})
 endif ()
-include_directories($ENV{LEF_ROOT}/include)
-link_directories($ENV{LEF_ROOT}/lib)
+#include_directories($ENV{LEF_ROOT}/include)
+#link_directories($ENV{LEF_ROOT}/lib)
 find_library(LEF_LIBRARY
     NAMES lef
     PATHS $ENV{LEF_ROOT}/lib
@@ -26,13 +53,19 @@ else ()
 endif()
 
 message(STATUS "Detecting environment variable DEF_ROOT...")
+set(DEF_ROOT "")
 if (DEFINED ENV{DEF_ROOT})
     message(STATUS "Environment variable DEF_ROOT detected: " $ENV{DEF_ROOT})
+    include_directories($ENV{DEF_ROOT}/include)
+    link_directories($ENV{DEF_ROOT}/lib)
+    set(DEF_ROOT $ENV{DEF_ROOT})
 else ()
-    message(FATAL_ERROR "Environment variable DEF_ROOT not found")
+    message(STATUS "Environment variable DEF_ROOT not found, using ACT_HOME instead")
+    include_directories($ENV{ACT_HOME}/include)
+    link_directories($ENV{ACT_HOME}/lib)
+    set(DEF_ROOT $ENV{ACT_HOME})
 endif ()
-include_directories($ENV{DEF_ROOT}/include)
-link_directories($ENV{DEF_ROOT}/lib)
+
 find_library(DEF_LIBRARY
     NAMES def
     PATHS $ENV{DEF_ROOT}/lib
@@ -56,18 +89,6 @@ endif ()
 
 message(STATUS "Detecting Galois libraries...")
 set(Galois_FOUND TRUE)
-find_library(
-    GALOIS_EDA_LIBRARY
-    NAMES galois_eda
-    PATHS $ENV{ACT_HOME}/lib
-)
-set(Galois_LIBRARIES ${GALOIS_EDA_LIBRARY})
-if (GALOIS_EDA_LIBRARY)
-    message(STATUS "Found libgalois_eda.a: " ${GALOIS_EDA_LIBRARY})
-else()
-    message(STATUS "Cannot find libgalois_eda.a")
-    set(Galois_FOUND FALSE)
-endif()
 find_library(
     GALOIS_SHMEM_LIBRARY
     NAMES galois_shmem
@@ -118,24 +139,6 @@ endif()
 
 
 
-message(STATUS "Detecting environment variable $ENV{ACT_HOME}...")
-if (DEFINED ENV{ACT_HOME})
-    message(STATUS "Environment variable ACT_HOME detected: " $ENV{ACT_HOME})
-else ()
-    message(FATAL_ERROR "Environment variable $ENV{ACT_HOME} not found")
-endif ()
-include_directories($ENV{ACT_HOME}/include)
-link_directories($ENV{ACT_HOME}/lib)
-find_library(PHYDB_LIBRARY
-    NAMES phydb
-    PATHS $ENV{ACT_HOME}/lib
-    REQUIRED)
-if (NOT PHYDB_LIBRARY)
-    message(FATAL_ERROR "libphydb.a is not found")
-else ()
-    message(STATUS "libphydb.a found")
-endif()
-
 find_package(Boost 1.69.0 REQUIRED)
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIR}")
@@ -180,11 +183,11 @@ add_library(bipart
 target_link_libraries(bipart
   lef def phydb galois_shmem galois_eda numa pthread)
 
-add_executable(bipart_test
-  test/main.cpp)
+#add_executable(bipart_test
+#  test/main.cpp)
 
-target_link_libraries(bipart_test
-  lef def galois_shmem galois_eda numa bipart phydb pthread)
+#target_link_libraries(bipart_test
+#  lef def galois_shmem galois_eda numa bipart phydb pthread)
 
 
 
