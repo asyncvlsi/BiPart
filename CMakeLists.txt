@@ -90,18 +90,42 @@ endif ()
 message(STATUS "Detecting Galois libraries...")
 set(Galois_FOUND TRUE)
 find_library(
+    GALOIS_EDA_LIBRARY
+    NAMES galois_eda
+    PATHS $ENV{ACT_HOME}/lib
+)
+if (GALOIS_EDA_LIBRARY)
+    set(Galois_LIBRARIES ${GALOIS_EDA_LIBRARY})
+    message(STATUS "Found libgalois_eda.a: " ${GALOIS_EDA_LIBRARY})
+else()
+    message(STATUS "Cannot find libgalois_eda.a")
+    set(Galois_FOUND FALSE)
+endif()
+find_library(
     GALOIS_SHMEM_LIBRARY
     NAMES galois_shmem
     PATHS $ENV{ACT_HOME}/lib
 )
-set(Galois_LIBRARIES ${Galois_LIBRARIES} ${GALOIS_SHMEM_LIBRARY})
 if (GALOIS_SHMEM_LIBRARY)
+    set(Galois_LIBRARIES ${Galois_LIBRARIES} ${GALOIS_SHMEM_LIBRARY})
     message(STATUS "Found libgalois_shmem.a: " ${GALOIS_SHMEM_LIBRARY})
 else()
     message(STATUS "Cannot find libgalois_shmem.a")
     set(Galois_FOUND FALSE)
 endif()
-
+if (UNIX AND (NOT APPLE))
+    find_library(
+        NUMA_LIBRARY
+        NAMES numa
+    )
+    if (NUMA_LIBRARY)
+        set(Galois_LIBRARIES ${Galois_LIBRARIES} ${NUMA_LIBRARY})
+        message(STATUS "Found libnuma: " ${NUMA_LIBRARY})
+    else()
+        message(STATUS "Cannot find libnuma")
+        set(Galois_FOUND FALSE)
+    endif()
+endif()
 
 
 
@@ -168,7 +192,7 @@ add_library(bipart
 
 
 target_link_libraries(bipart
-  lef def phydb galois_shmem galois_eda numa pthread)
+  lef def phydb ${Galois_LIBRARIES} pthread)
 
 #add_executable(bipart_test
 #  test/main.cpp)
