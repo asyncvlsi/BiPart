@@ -101,19 +101,6 @@ else()
     message(STATUS "Cannot find libgalois_shmem.a")
     set(Galois_FOUND FALSE)
 endif()
-if (UNIX)
-    find_library(
-        NUMA_LIBRARY
-        NAMES numa
-    )
-    set(Galois_LIBRARIES ${Galois_LIBRARIES} ${NUMA_LIBRARY})
-    if (NUMA_LIBRARY)
-        message(STATUS "Found libnuma: " ${NUMA_LIBRARY})
-    else()
-        message(STATUS "Cannot find libnuma")
-        set(Galois_FOUND FALSE)
-    endif()
-endif()
 
 
 
