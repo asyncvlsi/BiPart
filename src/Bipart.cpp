@@ -63,7 +63,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   components_count = components.size();
   uint64_t nodes  = components_count;
   for (auto com : components) {
-      std::string node_name = com.name_;
+      std::string node_name = com.GetName();
         mapNodes[node_name] = nodeid;
         mapNodeId[nodeid] = node_name;
         nodeid++;
@@ -78,10 +78,8 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
   uint32_t cnt = 0;
   for (auto &net: nets) {
     std::string net_name(net.GetName());
-    int sz = net.pins_.size();
-    for (auto &pin: net.pins_) {
-            std::string component_name =
-                phy_db_design.components_[pin.comp_id].GetName();
+    for (auto &pin: net.GetPinsRef()) {
+            std::string component_name = components[pin.InstanceId()].GetName();
         int valn = mapNodes[component_name];
         unsigned newval = (valn);
         edges_id[cnt].push_back(newval);
