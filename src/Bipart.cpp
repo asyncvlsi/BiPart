@@ -312,7 +312,7 @@ MetisGraph* biparting(PhyDB& db, unsigned Csize, unsigned K) {
             galois::steal(),
             galois::loopname("set part: inside recursive call"));
 
-        delete mcg;
+        // delete mcg;
       } // end if
     }   // end for
 
